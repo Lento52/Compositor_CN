@@ -37,7 +37,7 @@ struct FilterSheet: View {
                 control("Blues", \.blackWhite.blues, range: BlackWhiteSettings.range, unit: "%", decimals: 0, logarithmic: false, track: .luminance(240))
                 control("Magentas", \.blackWhite.magentas, range: BlackWhiteSettings.range, unit: "%", decimals: 0, logarithmic: false, track: .luminance(300))
                 Toggle("Tint", isOn: flag(\.blackWhite.tint))
-                    .help("Color the result while keeping its tones, for a sepia or a cyanotype")
+                    .help(localized("Color the result while keeping its tones, for a sepia or a cyanotype"))
                 if settings.blackWhite.tint {
                     control("Hue", \.blackWhite.tintHue, range: 0...360, unit: "°", decimals: 0, logarithmic: false, track: .plain)
                     control("Saturation", \.blackWhite.tintSaturation, range: 0...100, unit: "%", decimals: 0, logarithmic: false,
@@ -60,7 +60,7 @@ struct FilterSheet: View {
                 control("Magenta / Green", \.colorBalance.highlightMagentaGreen, range: ColorBalanceSettings.range, unit: "", decimals: 0, logarithmic: false, track: Self.magentaGreenTrack)
                 control("Yellow / Blue", \.colorBalance.highlightYellowBlue, range: ColorBalanceSettings.range, unit: "", decimals: 0, logarithmic: false, track: Self.yellowBlueTrack)
                 Toggle("Preserve Luminosity", isOn: flag(\.colorBalance.preserveLuminosity))
-                    .help("Put each pixel's brightness back afterwards, so only the color moves")
+                    .help(localized("Put each pixel's brightness back afterwards, so only the color moves"))
             case .grain:
                 control("Amount", \.grain.amount, range: GrainSettings.amountRange, unit: "", decimals: 0, logarithmic: false)
                 control("Size", \.grain.size, range: GrainSettings.sizeRange, unit: "px", decimals: 1, logarithmic: true)
@@ -70,17 +70,17 @@ struct FilterSheet: View {
                     .fixedSize(horizontal: false, vertical: true)
                 Picker("Quality", selection: Binding(get: { settings.backgroundQuality },
                                                      set: { new in update { $0.backgroundQuality = new } })) {
-                    ForEach(BackgroundQuality.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                    ForEach(BackgroundQuality.allCases, id: \.self) { Text(localized($0.rawValue)).tag($0) }
                 }
                 .pickerStyle(.segmented).labelsHidden()
-                .help("Basic is quick; Advanced refines the mask against the layer's own detail, for hair and fur")
+                .help(localized("Basic is quick; Advanced refines the mask against the layer's own detail, for hair and fur"))
                 if settings.backgroundQuality == .advanced {
                     control("Refine", \.refineEdges, range: 0...40, unit: "px", decimals: 0, logarithmic: false)
-                        .help("Pull the mask onto the image's own edges, which recovers hair and fur")
+                        .help(localized("Pull the mask onto the image's own edges, which recovers hair and fur"))
                     control("Contrast", \.matteContrast, range: 0...100, unit: "%", decimals: 0, logarithmic: false)
-                        .help("Clear the haze that leaves background showing through thin areas")
+                        .help(localized("Clear the haze that leaves background showing through thin areas"))
                     control("Shift Edge", \.shiftEdge, range: -10...10, unit: "px", decimals: 0, logarithmic: false)
-                        .help("Shrink the mask to drop the rim of background color around the subject, or grow it")
+                        .help(localized("Shrink the mask to drop the rim of background color around the subject, or grow it"))
                 }
             case .contentAwareFill:
                 Text("Fill the selection using surrounding pixels from this layer.")
@@ -116,16 +116,16 @@ struct FilterSheet: View {
                             .contentShape(shape)
                     }
                     .buttonStyle(.plain)
-                    .help("Choose the vignette color")
+                    .help(localized("Choose the vignette color"))
                     Spacer()
                 }
                 control("Amount", \.vignetteAmount, range: 0...100, unit: "%", decimals: 0, logarithmic: false)
-                    .help("Blend the chosen color into the edges while keeping the center unchanged")
+                    .help(localized("Blend the chosen color into the edges while keeping the center unchanged"))
                 control("Midpoint", \.vignetteMidpoint, range: 0...100, unit: "%", decimals: 0, logarithmic: false)
                 control("Roundness", \.vignetteRoundness, range: -100...100, unit: "", decimals: 0, logarithmic: false)
                 control("Feather", \.vignetteFeather, range: 0...100, unit: "%", decimals: 0, logarithmic: false)
                 control("Highlights", \.vignetteHighlights, range: 0...100, unit: "%", decimals: 0, logarithmic: false)
-                    .help("Protect bright areas near the edge")
+                    .help(localized("Protect bright areas near the edge"))
             case .bloomGlow:
                 control("Amount", \.bloomAmount, range: 0...100, unit: "%", decimals: 0, logarithmic: false)
                 control("Radius", \.bloomRadius, range: 1...150, unit: "px", decimals: 0, logarithmic: true)
@@ -158,7 +158,7 @@ struct FilterSheet: View {
                 // make the panel flicker as it grows and shrinks.
                 if edit?.committing == true || (edit?.preparing == true && edit?.kind.isAutomatic == true) {
                     ProgressView().controlSize(.small)
-                    Text(edit?.committing == true ? "Applying…" : "Working…")
+                    Text(localized(edit?.committing == true ? "Applying…" : "Working…"))
                         .font(.callout).foregroundStyle(.secondary)
                 }
                 Button("OK") { Task { await session.commitFilter() } }
@@ -288,7 +288,7 @@ struct FilterSheet: View {
         let step = pow(10, Double(decimals))
         let reset = { update { $0 = Self.resetting(key, in: $0) } }
         return HStack(spacing: 10) {
-            Text(title).fixedSize()
+            Text(localized(title)).fixedSize()
                 .background(GeometryReader { Color.clear.preference(key: LabelWidthKey.self, value: $0.size.width) })
                 .frame(width: labelWidth, alignment: .leading)
                 .onTapGesture(count: 2) { if track != nil { reset() } }
@@ -297,7 +297,7 @@ struct FilterSheet: View {
                             range: range)
             if let track {
                 CameraRawSlider(value: settings[keyPath: key], range: range, track: track,
-                                help: "\(title). Double-click to reset.",
+                                help: String(localized: "\(localized(title)). Double-click to reset."),
                                 onChange: { value in update { $0[keyPath: key] = (value * step).rounded() / step } },
                                 onReset: reset)
             } else {
@@ -305,7 +305,7 @@ struct FilterSheet: View {
                                       set: { value in update { $0[keyPath: key] = ((logarithmic ? exp(value) : value) * step).rounded() / step } }),
                        in: logarithmic ? log(range.lowerBound)...log(range.upperBound) : range)
             }
-            TextField(title, value: Binding(get: { settings[keyPath: key] }, set: { value in update { $0[keyPath: key] = value } }),
+            TextField(localized(title), value: Binding(get: { settings[keyPath: key] }, set: { value in update { $0[keyPath: key] = value } }),
                       format: .number.precision(.fractionLength(0...decimals)))
                 .frame(width: 56).textFieldStyle(.roundedBorder).multilineTextAlignment(.trailing)
                 .unitSuffix(unit)
@@ -351,9 +351,9 @@ struct GradientMapControls: View {
                     .contentShape(shape)
             }
             .buttonStyle(.plain)
-            .help("Choose the \(title.lowercased()) color")
-            .accessibilityLabel("\(title) color")
-            Text(title)
+            .help(String(localized: "Choose the \(localized(title).lowercased()) color"))
+            .accessibilityLabel(String(localized: "\(localized(title)) color"))
+            Text(localized(title))
         }
     }
 }

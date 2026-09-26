@@ -149,7 +149,7 @@ struct ContentView: View {
         }
         .onAppear { applicationDelegate?.showEditor = { openWindow(id: "editor") } }
         .preferredColorScheme(.dark)
-        .navigationTitle(session.projectURL?.deletingPathExtension().lastPathComponent ?? "Untitled")
+        .navigationTitle(session.projectURL?.deletingPathExtension().lastPathComponent ?? localized("Untitled"))
         .toolbar {
             ToolbarItem(placement: .navigation) {
                 Button { requestNewCanvas() } label: { Label("New canvas", systemImage: "plus") }

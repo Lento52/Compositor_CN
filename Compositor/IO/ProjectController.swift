@@ -50,7 +50,7 @@ final class ProjectController {
         panel.canCreateDirectories = true
         panel.isExtensionHidden = false
         panel.title = localized("Export PNG")
-        panel.nameFieldStringValue = (session.projectURL?.deletingPathExtension().lastPathComponent ?? "Untitled") + ".png"
+        panel.nameFieldStringValue = (session.projectURL?.deletingPathExtension().lastPathComponent ?? localized("Untitled")) + ".png"
         let response: NSApplication.ModalResponse
         if let window { response = await panel.beginSheetModal(for: window) }
         else { response = await panel.begin() }
@@ -154,7 +154,7 @@ final class ProjectController {
             panel.canCreateDirectories = true
             panel.isExtensionHidden = false
             panel.title = localized("Export JPEG")
-            panel.nameFieldStringValue = (session.projectURL?.deletingPathExtension().lastPathComponent ?? "Untitled") + ".jpg"
+            panel.nameFieldStringValue = (session.projectURL?.deletingPathExtension().lastPathComponent ?? localized("Untitled")) + ".jpg"
             guard await panel.beginSheetModal(for: window) == .OK, let url = panel.url else { return }
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
@@ -178,7 +178,7 @@ final class ProjectController {
             panel.allowedContentTypes = [.compositorProject]
             panel.canCreateDirectories = true
             panel.isExtensionHidden = false
-            panel.nameFieldStringValue = session.projectURL?.lastPathComponent ?? "Untitled.comp"
+            panel.nameFieldStringValue = session.projectURL?.lastPathComponent ?? (localized("Untitled") + ".comp")
             panel.title = localized(asNew ? "Save Project As" : "Save Project")
             let response: NSApplication.ModalResponse
             if let window { response = await panel.beginSheetModal(for: window) }

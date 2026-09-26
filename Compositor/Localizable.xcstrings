@@ -1514,7 +1514,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "画布文本"
+            "value": "画布文字"
           }
         }
       }
@@ -3560,7 +3560,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "拖出文本框 · 点击文本编辑 · 拖拽框手柄调整大小 · ⌘Return 完成 · Escape 取消"
+            "value": "拖出文字框 · 点击文字编辑 · 拖拽框手柄调整大小 · ⌘Return 完成 · Escape 取消"
           }
         }
       }
@@ -4044,7 +4044,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "编辑文本"
+            "value": "编辑文字"
           }
         }
       }
@@ -4077,7 +4077,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "可编辑文本图层"
+            "value": "可编辑文字图层"
           }
         }
       }
@@ -4561,7 +4561,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "完成文本编辑"
+            "value": "完成文字编辑"
           }
         }
       }
@@ -8059,7 +8059,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "好"
+            "value": "确定"
           }
         }
       }
@@ -11304,7 +11304,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "文本编辑"
+            "value": "文字编辑"
           }
         }
       }
@@ -11326,7 +11326,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "文本颜色"
+            "value": "文字颜色"
           }
         }
       }
@@ -11348,7 +11348,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "文本 · 双击编辑"
+            "value": "文字 · 双击编辑"
           }
         }
       }
@@ -11359,7 +11359,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "文本编辑快捷键需要 Command、Option 或 Control，以免取代正常输入。"
+            "value": "文字编辑快捷键需要 Command、Option 或 Control，以免取代正常输入。"
           }
         }
       }
@@ -11403,7 +11403,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "该文本框超出 %@ 像素边长或 %lld 百万像素限制。"
+            "value": "该文字框超出 %@ 像素边长或 %lld 百万像素限制。"
           }
         }
       }
@@ -11447,7 +11447,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Photoshop 文本变形已被忽略。"
+            "value": "Photoshop 文字变形已被忽略。"
           }
         }
       }
@@ -11513,7 +11513,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "未安装字体“%@”，文本已用系统字体绘制。"
+            "value": "未安装字体“%@”，文字已用系统字体绘制。"
           }
         }
       }
@@ -12855,7 +12855,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "文本"
+            "value": "文字"
           }
         }
       }

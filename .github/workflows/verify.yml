@@ -13,7 +13,15 @@ permissions:
 
 jobs:
   unit:
-    name: unit
+    name: unit (${{ matrix.language }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: en
+            region: US
+          - language: zh-Hans
+            region: CN
     # Push covers same-repo branches. pull_request runs only for forks, so a PR is not tested twice.
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: macos-26
@@ -24,13 +32,6 @@ jobs:
 
       - name: Select Xcode 26.6
         run: sudo xcode-select -s /Applications/Xcode_26.6.app
-
-      - name: Resolve Swift packages
-        run: >
-          xcodebuild -resolvePackageDependencies
-          -project Compositor.xcodeproj
-          -scheme Compositor
-          -onlyUsePackageVersionsFromResolvedFile
 
       - name: Build for testing
         id: build
@@ -43,6 +44,9 @@ jobs:
           -derivedDataPath DerivedData
           CODE_SIGN_IDENTITY=-
 
+      - name: Check Simplified Chinese resources
+        run: python3 scripts/check-localization.py --derived-data DerivedData
+
       # These two suites show real windows and time them, so they run alone after the rest.
       - name: Run unit tests in parallel
         run: >
@@ -53,6 +57,7 @@ jobs:
           -derivedDataPath DerivedData
           -resultBundlePath ParallelResults.xcresult
           -parallel-testing-enabled YES
+          -testLanguage ${{ matrix.language }} -testRegion ${{ matrix.region }}
           -skip-testing:CompositorTests/FloatingPanelTests
           -skip-testing:CompositorTests/SliderSnapTests
 
@@ -66,6 +71,7 @@ jobs:
           -derivedDataPath DerivedData
           -resultBundlePath SerialResults.xcresult
           -parallel-testing-enabled NO
+          -testLanguage ${{ matrix.language }} -testRegion ${{ matrix.region }}
           -only-testing:CompositorTests/FloatingPanelTests
           -only-testing:CompositorTests/SliderSnapTests
 
@@ -73,7 +79,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: unit-test-results
+          name: unit-test-results-${{ matrix.language }}
           path: '*.xcresult'
           retention-days: 7
           if-no-files-found: ignore

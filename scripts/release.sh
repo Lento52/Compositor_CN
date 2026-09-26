@@ -29,7 +29,7 @@ PY_CONFIG
 xcodebuild -exportArchive -quiet -archivePath "$WORK/Compositor.xcarchive" \
   -exportOptionsPlist "$WORK/ExportOptions.plist" -exportPath "$WORK/export"
 APP_PATH="$WORK/export/Compositor.app"
-codesign --verify --deep --strict "$APP_PATH"
+python3 "$PROJECT_DIR/scripts/check-local-build.py" "$APP_PATH"
 ditto -c -k --keepParent "$APP_PATH" "$WORK/Compositor.zip"
 xcrun notarytool submit "$WORK/Compositor.zip" --keychain-profile "$CN_NOTARY_PROFILE" --wait
 xcrun stapler staple "$APP_PATH"

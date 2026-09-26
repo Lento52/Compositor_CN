@@ -17,7 +17,7 @@ struct LayerTests {
         session.activeLayerID = first.id
         session.addBlankLayer()
         let layers = try #require(session.document?.layers)
-        #expect(layers.map(\.name) == [localized("Layer 1"), localized("Layer 4"), localized("Layer 2"), localized("Layer 3")])
+        #expect(layers.map(\.name) == [localized("Layer 1"), String(localized: "Layer \(4)"), String(localized: "Layer \(2)"), String(localized: "Layer \(3)")])
         #expect(layers[1].id == session.activeLayerID)
         #expect(layers[1].asset == nil)
         #expect(layers[1].size == CGSize(width: 800, height: 600))
@@ -57,11 +57,11 @@ struct LayerTests {
         let session = sessionWithThreeLayers()
         let active = session.activeLayerID
         session.reorderLayers(from: IndexSet(integer: 0), to: 3)
-        #expect(session.document?.layers.map(\.name) == [localized("Layer 3"), localized("Layer 1"), localized("Layer 2")])
+        #expect(session.document?.layers.map(\.name) == [String(localized: "Layer \(3)"), localized("Layer 1"), String(localized: "Layer \(2)")])
         #expect(session.activeLayerID == active)
         #expect(!session.canMoveActiveLayer(by: -1))
         session.moveActiveLayer(by: 1)
-        #expect(session.document?.layers.map(\.name) == [localized("Layer 1"), localized("Layer 3"), localized("Layer 2")])
+        #expect(session.document?.layers.map(\.name) == [localized("Layer 1"), String(localized: "Layer \(3)"), String(localized: "Layer \(2)")])
         session.reorderLayers(from: IndexSet(integer: 99), to: 0)
         #expect(session.document?.layers.count == 3)
     }

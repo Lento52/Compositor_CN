@@ -88,7 +88,7 @@ extension ProjectController {
 
     private func askToRevert(in window: NSWindow) async -> Bool {
         let alert = NSAlert()
-        alert.messageText = String(localized: "“\(session.projectURL?.lastPathComponent ?? "Untitled")” was changed on disk.")
+        alert.messageText = String(localized: "“\(session.projectURL?.lastPathComponent ?? localized("Untitled"))” was changed on disk.")
         alert.informativeText = String(localized: "Another app changed this project. You can revert to the version on disk, losing your unsaved changes, or keep what you have.")
         alert.addButton(withTitle: String(localized: "Revert"))
         alert.addButton(withTitle: String(localized: "Keep Mine"))

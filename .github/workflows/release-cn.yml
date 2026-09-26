@@ -1,0 +1,72 @@
+name: Release CN
+
+on:
+  push:
+    tags:
+      - 'cn-v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-cn-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    if: github.repository == 'Lento52/Compositor_CN'
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Select Xcode 26.6
+        run: sudo xcode-select -s /Applications/Xcode_26.6.app
+
+      - name: Build and verify unnotarized universal DMG
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          ./scripts/package-unnotarized.sh "$RELEASE_TAG"
+          mkdir release-assets
+          cp dist/Compositor-CN-release-*/*.dmg dist/Compositor-CN-release-*/SHA256SUMS.txt release-assets/
+
+      - name: Save verified release assets
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: cn-release-assets
+          path: release-assets/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout release notes
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Download verified release assets
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: cn-release-assets
+          path: release-assets
+
+      - name: Verify checksums and publish Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          GH_REPO: Lento52/Compositor_CN
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^cn-v[0-9]+\.[0-9]+\.[0-9]+-[0-9]+$ ]]
+          notes="docs/releases/$RELEASE_TAG.md"
+          test -f "$notes"
+          cd release-assets
+          sha256sum --check SHA256SUMS.txt
+          gh release create "$RELEASE_TAG" ./*.dmg SHA256SUMS.txt \
+            --verify-tag --title "Compositor 中文版 ${RELEASE_TAG#cn-v}（未公证）" \
+            --notes-file "$GITHUB_WORKSPACE/$notes" --latest

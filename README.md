@@ -4,6 +4,12 @@
 
 中文基础来自 [qg-lin 的 PR #126](https://github.com/robbietilton/Compositor/pull/126)，保留原作者提交署名；本仓库继续补齐新版功能、运行时提示和专业术语，并修复语言切换与独立 fork 配置。原项目与贡献者的 MIT 许可见 [LICENSE](LICENSE)。
 
+## 下载安装
+
+在 [Releases](https://github.com/Lento52/Compositor_CN/releases) 下载中文版 DMG；要求 macOS 26.5 或更新版本，包含 Apple 芯片与 Intel 两种架构。将“Compositor 中文版.app”拖到 Applications。
+
+当前安装包使用临时（ad-hoc）签名，**没有 Developer ID 签名，也没有通过 Apple 公证**。首次打开可能受到 macOS 限制；确认来源与 SHA-256 校验值后，参考 [Apple 官方说明](https://support.apple.com/zh-cn/102445)，在“系统设置 > 隐私与安全性”中为该应用选择“仍要打开”。Intel 架构已编译，尚未在 Intel 实机上验证。
+
 ## 本地使用
 
 要求 macOS 26.5 或更新版本；从源码构建要求 Xcode 26.6 或更新版本。
@@ -12,7 +18,7 @@
 ./scripts/build-local.sh
 ```
 
-命令输出本地应用的完整路径。也可以在 Xcode 中打开 `Compositor.xcodeproj`，运行 **Compositor** scheme。本地应用使用 ad-hoc 签名，尚未通过 Developer ID 签名与 Apple 公证；不能把它当作正式分发包。
+命令输出本地应用的完整路径。也可以在 Xcode 中打开 `Compositor.xcodeproj`，运行 **Compositor** scheme。本地应用使用 ad-hoc 签名，尚未通过 Developer ID 签名与 Apple 公证。
 
 在应用菜单的 **语言 / Language** 中选择“简体中文”“English”或“跟随系统”。设置保存后，先保存工作，退出应用并重新打开，新语言才会生效。
 
@@ -49,6 +55,8 @@ python3 scripts/check-localization.py   # 资源、格式参数和运行时 help
 
 应用标识为 `io.github.lento52.compositor-cn`，与官方应用的偏好设置和窗口状态分开保存，可以同时安装。已移除上游 Sparkle 自动更新和对应网络、更新助手权限；当前采用手动更新。
 
-本地构建会验证实际签名、权限、独立应用标识和中文资源，不发布、不推送。正式分发时，维护者需提供自己的 `CN_TEAM_ID`、`CN_SIGN_IDENTITY` 与保存在 Keychain 的 `CN_NOTARY_PROFILE`，再执行 `scripts/release.sh`。该脚本只生成签名、公证后的 DMG。
+本地构建会验证实际签名、权限、独立应用标识和中文资源，不发布、不推送。无需 Developer ID 的通用安装包可用 `scripts/package-unnotarized.sh cn-v1.3.3-1` 生成；输出 DMG 与 SHA-256 校验值，明确标注未公证。
 
-用户批准发布后，`scripts/publish.sh DMG路径 cn-v版本 发布说明文件` 可在 **Lento52/Compositor_CN** 创建草稿 Release，要求标签已存在于远端；不会更新 feed、提交或推送。正式签名、公证与远端发布需要届时单独验证。
+维护者确认发布后，推送 `cn-v版本-修订号` 标签可触发 `Release CN` 工作流，在 **Lento52/Compositor_CN** 构建、检查并发布未公证的 DMG；发布说明须预先放在 `docs/releases/标签.md`。仅发布步骤获得仓库内容写权限，不需要个人访问令牌。
+
+如未来需要 Developer ID 签名与 Apple 公证，维护者提供自己的 `CN_TEAM_ID`、`CN_SIGN_IDENTITY` 与保存在 Keychain 的 `CN_NOTARY_PROFILE` 后，执行 `scripts/release.sh`。该脚本只生成签名、公证后的 DMG。`scripts/publish.sh DMG路径 cn-v版本 发布说明文件` 可手动创建草稿 Release。

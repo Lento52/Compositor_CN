@@ -49,12 +49,12 @@ struct LevelsSheet: View {
                         edit?.sampleMode = edit?.sampleMode == mode ? nil : mode
                         session.brushRevision += 1
                     } label: {
-                        Label(localized(mode.rawValue), systemImage: "eyedropper")
+                        Label(mode.localizedTitle, systemImage: "eyedropper")
                     }.tint(edit?.sampleMode == mode ? .accentColor : .secondary)
                 }
             }
             if let mode = edit?.sampleMode {
-                Text("Click the original layer to set \(localized(mode.rawValue).lowercased()). Click the eyedropper again to stop.")
+                Text("Click the original layer to \(mode.localizedTitle.lowercased()). Click the eyedropper again to stop.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             VStack(alignment: .leading, spacing: 6) {

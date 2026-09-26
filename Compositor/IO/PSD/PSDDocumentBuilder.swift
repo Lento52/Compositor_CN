@@ -40,20 +40,20 @@ nonisolated enum PSDDocumentBuilder {
                 }
             }
             if record.kind == .smartObject {
-                notes.append("The smart object was rasterized. Linked contents can’t be edited.")
+                notes.append(localized("The smart object was rasterized. Linked contents can’t be edited."))
             }
             if record.kind == .effects {
-                notes.append("Layer effects were discarded, so the appearance may differ.")
+                notes.append(localized("Layer effects were discarded, so the appearance may differ."))
             }
             if record.kind == .vector {
                 if record.shape != nil {
                     notes.append(contentsOf: record.shapeNotes)
                 } else {
-                    notes.append("Vector shape was rasterized to pixels.")
+                    notes.append(localized("Vector shape was rasterized to pixels."))
                 }
             }
             if record.kind == .other {
-                notes.append("This Photoshop layer type isn’t supported and was imported as pixels.")
+                notes.append(localized("This Photoshop layer type isn’t supported and was imported as pixels."))
             }
             if record.isGroup {
                 if record.blendKey != "pass" && record.blendKey != "norm" {

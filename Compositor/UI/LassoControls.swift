@@ -96,7 +96,7 @@ struct LassoControls: View {
             }
             .help(localized("How far each color channel (0–255) can differ from the clicked color and still be selected"))
             Picker("Sample Size", selection: $session.wandSettings.sampleSize) {
-                ForEach(WandSampleSize.allCases, id: \.self) { Text($0.title).tag($0) }
+                ForEach(WandSampleSize.allCases, id: \.self) { Text(localized($0.title)).tag($0) }
             }
             .labelsHidden().fixedSize()
             .help(localized("Match the clicked pixel, or the average of the pixels around it"))

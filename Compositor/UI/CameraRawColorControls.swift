@@ -273,9 +273,9 @@ struct CameraRawMixerControls: View {
 
     private func familySlider(_ index: Int) -> some View {
         let key = mixerKey
-        let help = String(localized: "\(localized((edit?.cameraRawMixerTab ?? .hue).rawValue)) of \(CameraRawMixerSettings.names[index]).")
+        let help = String(localized: "\(localized((edit?.cameraRawMixerTab ?? .hue).rawValue)) of \(localized(CameraRawMixerSettings.names[index])).")
         return HStack {
-            Text(CameraRawMixerSettings.names[index]).frame(width: 78, alignment: .leading).help(help)
+            Text(localized(CameraRawMixerSettings.names[index])).frame(width: 78, alignment: .leading).help(help)
                 .scrubbable(sensitivity: 1,
                             value: Binding(get: { raw.mixer[keyPath: key][index] },
                                            set: { value in update { $0.mixer[keyPath: key][index] = value } }), range: -100...100)
@@ -306,7 +306,7 @@ struct CameraRawMixerControls: View {
                         .overlay { Circle().stroke(edit?.cameraRawMixerSwatch == index ? Color.white : Color.clear, lineWidth: 2) }
                 }
                 .buttonStyle(.plain)
-                .help(String(localized: "Edit \(CameraRawMixerSettings.names[index])."))
+                .help(String(localized: "Edit \(localized(CameraRawMixerSettings.names[index]))."))
             }
         }
     }

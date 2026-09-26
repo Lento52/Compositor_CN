@@ -1,5 +1,4 @@
 import SwiftUI
-import Sparkle
 
 @main
 struct CompositorApp: App {
@@ -12,7 +11,7 @@ struct CompositorApp: App {
                 set: { if $0 { LanguagePreference.set(language) } })
     }
     var body: some Scene {
-        Window("Compositor", id: "editor") {
+        Window("Compositor CN", id: "editor") {
             ProjectWorkspaceView(applicationDelegate: applicationDelegate).roundedControls()
         }
             .defaultSize(width: 1180, height: 780)
@@ -99,7 +98,6 @@ struct CompositorApp: App {
                 // Grouped: a commands builder takes at most ten items.
                 Group {
                     CommandGroup(after: .appInfo) {
-                        Button("Check for Updates…") { applicationDelegate.updater.checkForUpdates(nil) }
                         Menu("Language") {
                             Toggle(String(localized: "Follow System"), isOn: languageBinding(for: nil))
                             Divider()

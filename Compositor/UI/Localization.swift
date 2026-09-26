@@ -25,23 +25,20 @@ enum LanguagePreference {
     }
 
     static func set(_ language: String?) {
-        if let language { UserDefaults.standard.set([language], forKey: key) }
-        else { UserDefaults.standard.removeObject(forKey: key) }
-        offerRestart()
+        guard save(language) else { return }
+        let alert = NSAlert()
+        alert.messageText = String(localized: "Language change saved")
+        alert.informativeText = String(localized: "Save your work, quit Compositor CN, then open it again to apply the new language.")
+        alert.addButton(withTitle: String(localized: "OK"))
+        alert.runModal()
     }
 
-    private static func offerRestart() {
-        let alert = NSAlert()
-        alert.messageText = String(localized: "Restart Compositor to apply the language change?")
-        alert.informativeText = String(localized: "The interface language takes effect on the next launch.")
-        alert.addButton(withTitle: String(localized: "Restart Now"))
-        alert.addButton(withTitle: String(localized: "Later"))
-        guard alert.runModal() == .alertFirstButtonReturn else { return }
-        // A fresh instance picks up the new AppleLanguages; `open` returns before this process exits.
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
-        task.arguments = ["-n", Bundle.main.bundleURL.path]
-        try? task.run()
-        NSApp.terminate(nil)
+    /// Only changes this app's preferences; following the system removes the override.
+    @discardableResult
+    static func save(_ language: String?, defaults: UserDefaults = .standard) -> Bool {
+        guard language == nil || language == "en" || language == "zh-Hans" else { return false }
+        if let language { defaults.set([language], forKey: key) }
+        else { defaults.removeObject(forKey: key) }
+        return true
     }
 }

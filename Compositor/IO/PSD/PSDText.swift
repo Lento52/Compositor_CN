@@ -20,8 +20,8 @@ nonisolated enum PSDText {
         var anchorIsFrame: Bool
     }
 
-    static let rasterizedNote = "Editable Photoshop text becomes pixels and can’t be retyped."
-    static let firstStyleNote = "Only the first text style was kept."
+    static var rasterizedNote: String { localized("Editable Photoshop text becomes pixels and can’t be retyped.") }
+    static var firstStyleNote: String { localized("Only the first text style was kept.") }
     static var warpNote: String { localized("The Photoshop text warp was omitted.") }
     static var fauxNote: String { localized("Faux bold or faux italic was omitted.") }
     static var justifyNote: String { localized("Full justification was imported as left alignment.") }

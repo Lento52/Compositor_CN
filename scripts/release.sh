@@ -1,89 +1,44 @@
 #!/bin/zsh
-# Builds a signed, notarized Compositor DMG that opens without warnings on any Mac.
-#
-# Needs, all kept out of this repository:
-#   - a "Developer ID Application" certificate in the login keychain
-#   - notarization credentials saved once with:
-#       xcrun notarytool store-credentials "compositor-notary" --apple-id "…" --team-id 3E4X3B9Z9T
-#   - create-dmg (brew install create-dmg)
-# The DMG window background is scripts/dmg/dmg-bg.jpg (600 × 380, the window's exact size) plus
-# dmg-bg-retina.jpg (1200 × 760) for Retina displays.
+# 使用维护者自己的 Developer ID 和 Keychain 公证配置构建正式 DMG。
+# 示例：CN_TEAM_ID=团队标识 CN_SIGN_IDENTITY='Developer ID Application: …' \
+#       CN_NOTARY_PROFILE=Keychain配置名 ./scripts/release.sh
 set -euo pipefail
-
+: "${CN_TEAM_ID:?请设置维护者自己的 CN_TEAM_ID}"
+: "${CN_SIGN_IDENTITY:?请设置维护者自己的 CN_SIGN_IDENTITY}"
+: "${CN_NOTARY_PROFILE:?请设置维护者自己的 CN_NOTARY_PROFILE}"
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-APP=Compositor
-TEAM=3E4X3B9Z9T
-IDENTITY="Developer ID Application"
-NOTARY_PROFILE=compositor-notary
-# Built outside Dropbox: the extended attributes it adds to files make code signing fail.
-WORK="$HOME/Library/Caches/CompositorRelease"
-DIST="$PROJECT_DIR/dist"
-
-settings=$(xcodebuild -project "$PROJECT_DIR/$APP.xcodeproj" -scheme "$APP" -configuration Release -showBuildSettings 2>/dev/null)
+CACHE_ROOT="$HOME/Library/Caches/CompositorCNRelease"
+mkdir -p "$CACHE_ROOT" "$PROJECT_DIR/dist"
+WORK="$(mktemp -d "$CACHE_ROOT/build-XXXXXX")"
+settings=$(xcodebuild -project "$PROJECT_DIR/Compositor.xcodeproj" -scheme Compositor -configuration Release -showBuildSettings 2>/dev/null)
 VERSION=$(print -r -- "$settings" | awk -F' = ' '/ MARKETING_VERSION = /{print $2; exit}')
-BUILD=$(print -r -- "$settings" | awk -F' = ' '/ CURRENT_PROJECT_VERSION = /{print $2; exit}')
-echo "==> $APP $VERSION ($BUILD)"
-
-rm -rf "$WORK"
-mkdir -p "$WORK" "$DIST"
-
-echo "==> Archiving a Release build"
+DMG="$PROJECT_DIR/dist/Compositor-CN-$VERSION.dmg"
+[[ ! -e "$DMG" ]] || { echo "文件已存在，请先保留旧包或提高版本：$DMG"; exit 1; }
 xcodebuild archive -quiet \
-  -project "$PROJECT_DIR/$APP.xcodeproj" -scheme "$APP" -configuration Release \
-  -destination "generic/platform=macOS" \
-  -archivePath "$WORK/$APP.xcarchive" -derivedDataPath "$WORK/DerivedData" \
-  CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="$IDENTITY" DEVELOPMENT_TEAM="$TEAM"
-
-echo "==> Exporting, signed with Developer ID"
-xcodebuild -exportArchive -quiet \
-  -archivePath "$WORK/$APP.xcarchive" \
-  -exportOptionsPlist "$PROJECT_DIR/scripts/ExportOptions.plist" \
-  -exportPath "$WORK/export"
-APP_PATH="$WORK/export/$APP.app"
-codesign --verify --deep --strict --verbose=2 "$APP_PATH"
-
-echo "==> Notarizing the app"
-ditto -c -k --keepParent "$APP_PATH" "$WORK/$APP.zip"
-xcrun notarytool submit "$WORK/$APP.zip" --keychain-profile "$NOTARY_PROFILE" --wait
+  -project "$PROJECT_DIR/Compositor.xcodeproj" -scheme Compositor -configuration Release \
+  -destination "generic/platform=macOS" -archivePath "$WORK/Compositor.xcarchive" \
+  -derivedDataPath "$WORK/DerivedData" CODE_SIGN_STYLE=Manual \
+  CODE_SIGN_IDENTITY="$CN_SIGN_IDENTITY" DEVELOPMENT_TEAM="$CN_TEAM_ID" ENABLE_HARDENED_RUNTIME=YES
+# 不保存凭证；这里只生成公开的签名配置。
+python3 - "$WORK/ExportOptions.plist" "$CN_TEAM_ID" "$CN_SIGN_IDENTITY" <<'PY_CONFIG'
+import plistlib, sys
+with open(sys.argv[1], 'wb') as output:
+    plistlib.dump({'method': 'developer-id', 'signingStyle': 'manual',
+                  'teamID': sys.argv[2], 'signingCertificate': sys.argv[3]}, output)
+PY_CONFIG
+xcodebuild -exportArchive -quiet -archivePath "$WORK/Compositor.xcarchive" \
+  -exportOptionsPlist "$WORK/ExportOptions.plist" -exportPath "$WORK/export"
+APP_PATH="$WORK/export/Compositor.app"
+codesign --verify --deep --strict "$APP_PATH"
+ditto -c -k --keepParent "$APP_PATH" "$WORK/Compositor.zip"
+xcrun notarytool submit "$WORK/Compositor.zip" --keychain-profile "$CN_NOTARY_PROFILE" --wait
 xcrun stapler staple "$APP_PATH"
-
-echo "==> Building the DMG window"
-STAGE="$WORK/dmg"
-mkdir -p "$STAGE"
-cp -R "$APP_PATH" "$STAGE/"
-DMG="$DIST/$APP-$VERSION.dmg"
-rm -f "$DMG"
-# Icon centers in the DMG window, in points from its top-left.
-APP_X=160
-APPLICATIONS_X=440
-ICON_Y=180
-background=()
-LOW="$PROJECT_DIR/scripts/dmg/dmg-bg.jpg"
-HIGH="$PROJECT_DIR/scripts/dmg/dmg-bg-retina.jpg"
-if [[ -f "$LOW" && -f "$HIGH" ]]; then
-  # Finder takes one background file; a TIFF holding both sizes stays sharp on Retina displays.
-  sips -s format png -s dpiWidth 72 -s dpiHeight 72 "$LOW" --out "$WORK/background.png" >/dev/null
-  sips -s format png -s dpiWidth 144 -s dpiHeight 144 "$HIGH" --out "$WORK/background@2x.png" >/dev/null
-  tiffutil -cathidpicheck "$WORK/background.png" "$WORK/background@2x.png" -out "$WORK/background.tiff" >/dev/null
-  background=(--background "$WORK/background.tiff")
-elif [[ -f "$LOW" ]]; then
-  background=(--background "$LOW")
-fi
-create-dmg \
-  --volname "$APP" \
-  --window-pos 200 120 --window-size 600 380 \
-  --icon-size 128 --text-size 13 \
-  --icon "$APP.app" "$APP_X" "$ICON_Y" --hide-extension "$APP.app" \
-  --app-drop-link "$APPLICATIONS_X" "$ICON_Y" \
-  "${background[@]}" \
-  "$DMG" "$STAGE"
-
-echo "==> Signing and notarizing the DMG"
-codesign --sign "$IDENTITY" --timestamp "$DMG"
-xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait
+mkdir -p "$WORK/dmg"
+ditto "$APP_PATH" "$WORK/dmg/Compositor 中文版.app"
+ln -s /Applications "$WORK/dmg/Applications"
+hdiutil create -quiet -volname 'Compositor CN' -srcfolder "$WORK/dmg" -format UDZO "$DMG"
+codesign --sign "$CN_SIGN_IDENTITY" --timestamp "$DMG"
+xcrun notarytool submit "$DMG" --keychain-profile "$CN_NOTARY_PROFILE" --wait
 xcrun stapler staple "$DMG"
-
-echo "==> What Gatekeeper will say on another Mac"
-spctl --assess --type open --context context:primary-signature --verbose=2 "$DMG"
-spctl --assess --type execute --verbose=2 "$APP_PATH"
-echo "==> Done: $DMG"
+spctl --assess --type open --context context:primary-signature "$DMG"
+echo "已生成正式包：$DMG；未发布、未推送。"
